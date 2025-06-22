@@ -1,12 +1,12 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { FormSchema } from '../form-builder/shared/types/form-schema';
-import { FormModel } from '../form-builder/shared/types/form-model';
-import { Form } from '../form-builder/form/form';
-import { CustomField } from '../form-builder/shared/custom-field';
 import { ReactiveFormsModule } from '@angular/forms';
 import { formSchema } from './example-form.const';
 import { JsonPipe } from '@angular/common';
 import { from } from 'rxjs';
+import { Form } from '../../components/form-builder/form/form';
+import { CustomField } from '../../components/form-builder/shared/custom-field';
+import { FormSchema } from '../../components/form-builder/shared/types/form-schema';
+import { FormModel } from '../../components/form-builder/shared/types/form-model';
 
 @Component({
   selector: 'app-example-form',

@@ -8,14 +8,14 @@ export const routes: Routes = [
   },
   {
     path: 'example-form',
-    loadComponent: () => import('./example-form/example-form').then((f) => f.ExampleForm),
+    loadComponent: () => import('./pages/example-form/example-form').then((f) => f.ExampleForm),
   },
   {
     path: 'common-form',
-    loadComponent: () => import('./common-form/common-form').then((f) => f.CommonForm),
+    loadComponent: () => import('./pages/common-form/common-form').then((f) => f.CommonForm),
   },
   {
     path: 'autocomplete',
-    loadComponent: () => import('./example-autocomplete/example-autocomplete').then((f) => f.ExampleAutocomplete),
+    loadComponent: () => import('./pages/example-autocomplete/example-autocomplete').then((f) => f.ExampleAutocomplete),
   },
 ];
