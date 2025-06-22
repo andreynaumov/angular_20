@@ -116,4 +116,18 @@ export const formSchema = ({ options }: { options: Record<string, SelectOption<u
       },
     },
   },
+  {
+    name: 'fullAddress',
+    type: 'select',
+    config: {
+      label: 'Full Address',
+      options: options['fullAddress'],
+      expressions: {
+        valueChanges: ({ form, currentControlValue }) => {
+          // console.log('form: ', form);
+          // console.log('controlValue: ', controlValue);
+        },
+      },
+    },
+  },
 ];

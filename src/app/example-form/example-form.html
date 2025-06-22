@@ -2,14 +2,13 @@
 
 @if (formSchemaValue) {
   <app-form [formSchema]="formSchemaValue" [formModel]="formModel()" (submitEvent)="logFormValue($event)">
-    <ng-template appCustomField="hasChildren" let-control="control" let-fieldSchema="fieldSchema" let-config="config">
-      <pre>control.value: {{ control.value }}</pre>
-      <pre>config: {{ config | json }}</pre>
-      <pre>fieldSchema: {{ fieldSchema | json }}</pre>
-      <mat-checkbox [formControl]="control">Has children(custom)</mat-checkbox>
+    <ng-template appCustomField="fullAddress" let-control="control" let-fieldSchema="fieldSchema" let-config="config">
+      <div class="suggest-address">
+        <!-- <pre>control.value: {{ control.value }}</pre> -->
+        <!-- <pre>config: {{ config | json }}</pre> -->
+        <!-- <pre>fieldSchema: {{ fieldSchema | json }}</pre> -->
+        <input type="text" [formControl]="control" />
+      </div>
     </ng-template>
-
-    <!-- <ng-template appCustomField="firstName" let-control="control" let-fieldSchema="fieldSchema"> firstName</ng-template> -->
-    <!-- <ng-template appCustomField="name" let-control="control" let-fieldSchema="fieldSchema"> name </ng-template> -->
   </app-form>
 }
