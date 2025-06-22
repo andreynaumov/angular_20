@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { ExampleForm } from './example-form/example-form';
-import { CommonForm } from './common-form/common-form';
+import { NavbarComponent } from './navbar/navbar.component';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [ExampleForm],
+  imports: [NavbarComponent, RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
