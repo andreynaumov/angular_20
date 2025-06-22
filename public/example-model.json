@@ -1,0 +1,18 @@
+{
+  "bio": {
+    "firstName": "Ivan",
+    "age": 25
+  },
+  "siblings": [
+    {
+      "name": "Maria",
+      "relationship": "sister"
+    },
+    {
+      "name": "Denis",
+      "relationship": "brother"
+    }
+  ],
+  "hasChildren": true,
+  "maritalStatus": "married"
+}
