@@ -1,0 +1,15 @@
+:host {
+  display: block;
+}
+
+.wrapper {
+  padding: 16px;
+
+  @media (min-width: 768px) {
+    padding: 32px;
+  }
+
+  @media (min-width: 1200px) {
+    padding: 48px;
+  }
+}
