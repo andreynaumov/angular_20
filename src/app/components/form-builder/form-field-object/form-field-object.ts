@@ -1,6 +1,6 @@
-import { Component, forwardRef } from '@angular/core';
+import { Component, computed, forwardRef } from '@angular/core';
 import { FormField } from '../form-field/form-field';
-import { FormGroup, UntypedFormArray, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { UntypedFormArray, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { CompositeFormField } from '../shared/abstractions/composite-form-field';
 
 @Component({
@@ -9,6 +9,8 @@ import { CompositeFormField } from '../shared/abstractions/composite-form-field'
   templateUrl: './form-field-object.html',
   styleUrl: './form-field-object.scss',
 })
-export class FormFieldObject extends CompositeFormField<
-  FormGroup<Record<string, UntypedFormArray | UntypedFormGroup | UntypedFormControl>>
-> {}
+export class FormFieldObject extends CompositeFormField<UntypedFormGroup> {
+  public readonly controls = computed(
+    () => this.control().controls as { [key: string]: UntypedFormControl | UntypedFormGroup | UntypedFormArray },
+  );
+}
