@@ -1,4 +1,4 @@
-import { Component, computed, contentChildren, DestroyRef, effect, inject, input, output } from '@angular/core';
+import { Component, computed, contentChildren, input, output } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormField } from '../form-field/form-field';
 import { MatButtonModule } from '@angular/material/button';
@@ -21,8 +21,7 @@ export class Form {
 
   public readonly customFields = contentChildren(CustomField);
 
-  public readonly formData = computed(() => buildForm({ schema: this.formSchema(), model: this.formModel() }));
-  public readonly form = computed(() => this.formData().form);
+  public readonly form = computed(() => buildForm({ schema: this.formSchema(), model: this.formModel() }));
 
   public getCustomField(fieldName: string): CustomField | undefined {
     return this.customFields().find((customField) => customField.name() === fieldName);

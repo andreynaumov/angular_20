@@ -2,9 +2,13 @@ import { FormGroup, UntypedFormArray, UntypedFormControl, UntypedFormGroup } fro
 import { FormModel } from '../types/form-model';
 import { FormSchema } from '../types/form-schema';
 
-export function buildForm({ schema, model }: { schema: FormSchema; model: FormModel | null | undefined }): {
-  form: FormGroup<Record<string, UntypedFormControl | UntypedFormGroup | UntypedFormArray>>;
-} {
+export function buildForm({
+  schema,
+  model,
+}: {
+  schema: FormSchema;
+  model: FormModel | null | undefined;
+}): FormGroup<Record<string, UntypedFormControl | UntypedFormGroup | UntypedFormArray>> {
   const form = new FormGroup<Record<string, UntypedFormControl | UntypedFormGroup | UntypedFormArray>>({});
 
   for (const fieldSchema of schema) {
@@ -16,7 +20,7 @@ export function buildForm({ schema, model }: { schema: FormSchema; model: FormMo
     if (fieldSchema.type === 'object') {
       const objectSubModel = typeof subModel === 'object' && !Array.isArray(subModel) ? subModel : null;
 
-      control = buildForm({ schema: fieldSchema.schema, model: objectSubModel }).form;
+      control = buildForm({ schema: fieldSchema.schema, model: objectSubModel });
     }
 
     if (fieldSchema.type === 'array') {
@@ -25,7 +29,7 @@ export function buildForm({ schema, model }: { schema: FormSchema; model: FormMo
       const arraySubModel = typeof subModel === 'object' && Array.isArray(subModel) ? subModel : [];
 
       for (const arraySubModelItem of arraySubModel) {
-        control.push(buildForm({ schema: fieldSchema.schema, model: arraySubModelItem }).form);
+        control.push(buildForm({ schema: fieldSchema.schema, model: arraySubModelItem }));
       }
     }
 
@@ -36,5 +40,5 @@ export function buildForm({ schema, model }: { schema: FormSchema; model: FormMo
     form.addControl(fieldSchema.name, control);
   }
 
-  return { form };
+  return form;
 }

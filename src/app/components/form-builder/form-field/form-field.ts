@@ -1,12 +1,14 @@
 import { Component, computed, DestroyRef, effect, inject, input, signal } from '@angular/core';
 import { NgComponentOutlet, NgTemplateOutlet } from '@angular/common';
-import { FormControl, ReactiveFormsModule, UntypedFormArray, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormArray, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { FORM_FIELD_COMPONENTS } from '../shared/constants/form-field-components';
 import { FormFieldSchema } from '../shared/types/form-schema';
-import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { map, merge, mergeMap, startWith } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { startWith } from 'rxjs';
 import { CustomField } from '../shared/custom-field';
 import { DependencyType } from '../shared/types/form-config';
+import { getRootControl } from '../shared/functions/get-root-control';
+import { findControlByName } from '../shared/functions/find-control-by-name';
 
 @Component({
   selector: 'app-form-field',
@@ -33,6 +35,7 @@ export class FormField {
 
     const commonInputs = {
       control: this.control(),
+      fieldName: this.fieldName(),
       config: fieldSchema.config,
     };
 
@@ -41,32 +44,15 @@ export class FormField {
       : { ...commonInputs, isReadonly: this.isReadonly() };
   });
 
-  private readonly currentControlValue = toSignal(
-    merge(
-      toObservable(this.control).pipe(map(({ value }) => value)), // Get the initial value when 'control' changes
-      toObservable(this.control).pipe(mergeMap(({ valueChanges }) => valueChanges)), // Get the new value when 'control.value' changes
-    ),
-  );
-
   constructor() {
     effect(() => {
-      const rootControl = this.getRootControl();
-
-      const valueChangesFn = this.fieldSchema().config?.expressions?.valueChanges;
-
-      if (valueChangesFn) {
-        valueChangesFn({ form: rootControl, currentControlValue: this.currentControlValue() });
-      }
-    });
-
-    effect(() => {
-      const rootControl = this.getRootControl();
+      const rootControl = getRootControl(this.control());
       const dependencies = this.fieldSchema().config?.dependencies;
 
       if (!dependencies) return;
 
       for (const dependency of dependencies) {
-        const sourceControl = this.findControlByName(dependency.sourceField, rootControl);
+        const sourceControl = findControlByName(dependency.sourceField, rootControl);
 
         if (!sourceControl) {
           throw new Error(`Control with ${dependency.sourceField} is not exists`);
@@ -78,9 +64,23 @@ export class FormField {
             const result = dependency.when({ form: rootControl, sourceControlValue });
 
             switch (dependency.type) {
-              case DependencyType.Hide:
-                this.isShow.set(!result);
+              case DependencyType.Hide: {
+                const isShow = !result;
+
+                this.isShow.set(isShow);
+
+                const controlValidators = this.fieldSchema().config?.validators ?? [];
+
+                if (isShow) {
+                  this.control().addValidators(controlValidators);
+                } else {
+                  this.control().removeValidators(controlValidators);
+                  this.control().reset();
+                }
+
+                this.control().updateValueAndValidity();
                 break;
+              }
 
               case DependencyType.Disabled:
                 result ? this.control().disable() : this.control().enable();
@@ -98,35 +98,5 @@ export class FormField {
           });
       }
     });
-  }
-
-  private getRootControl(): UntypedFormGroup {
-    let currentControl = this.control();
-
-    while (currentControl.parent) currentControl = currentControl.parent;
-
-    return currentControl as UntypedFormGroup;
-  }
-
-  private findControlByName(controlName: string, rootControl: UntypedFormGroup): FormControl | null {
-    let control: null | FormControl = null;
-
-    for (const [currentControlName, currentControl] of Object.entries(rootControl.controls)) {
-      if (currentControlName === controlName) {
-        // @ts-ignore
-        control = currentControl;
-      }
-
-      if ('controls' in currentControl && Array.isArray(currentControl.controls)) {
-        //
-      }
-
-      if ('controls' in currentControl) {
-        // @ts-ignore
-        control = this.findControlByName(currentControlName, currentControl);
-      }
-    }
-
-    return control;
   }
 }

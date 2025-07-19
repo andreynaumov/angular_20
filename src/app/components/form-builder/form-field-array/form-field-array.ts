@@ -23,7 +23,7 @@ export class FormFieldArray extends CompositeFormField<UntypedFormArray> {
 
     if (!fieldSchema) return;
 
-    const createdControl = buildForm({ schema: fieldSchema, model: null }).form;
+    const createdControl = buildForm({ schema: fieldSchema, model: null });
 
     parentControlArray.push(createdControl);
   }
