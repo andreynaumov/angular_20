@@ -1,10 +1,12 @@
 <form [formGroup]="form()" (ngSubmit)="onSubmit()">
   @for (fieldSchema of formSchema(); track $index) {
     <app-form-field
-      [customFields]="customFields()"
       [control]="form().controls[fieldSchema.name]"
+      [customFields]="customFields()"
       [fieldName]="fieldSchema.name"
       [fieldSchema]="fieldSchema"
+      [formErrors]="formErrors()"
+      [formModel]="formModel()"
     />
   }
 

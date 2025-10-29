@@ -1,15 +1,20 @@
-import { Directive, effect, input } from '@angular/core';
+import { ChangeDetectorRef, Directive, effect, inject, input, untracked } from '@angular/core';
 import { FormFieldConfig } from '../types/form-config';
 import { UntypedFormArray, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { map, merge, mergeMap } from 'rxjs';
 import { getRootControl } from '../functions/get-root-control';
+import { FormModel } from '../types/form-model';
 
 @Directive()
 export abstract class BaseFormField<T extends UntypedFormControl | UntypedFormGroup | UntypedFormArray> {
+  protected readonly cdr = inject(ChangeDetectorRef);
+
   protected readonly control = input.required<T>();
   protected readonly fieldName = input.required<string>();
-  protected readonly config = input<FormFieldConfig>();
+  protected readonly config = input.required<FormFieldConfig>();
+  protected readonly formModel = input.required<FormModel | null | undefined>();
+  protected readonly formErrors = input.required<Record<string, string[]> | null | undefined>();
 
   protected readonly currentControlValue = toSignal(
     merge(
@@ -18,13 +23,11 @@ export abstract class BaseFormField<T extends UntypedFormControl | UntypedFormGr
     ),
   );
 
-  constructor() {
-    effect(() => {
-      const valueChangesFn = this.config()?.expressions?.valueChanges;
+  valueChangeExpressionEffect = effect(() => {
+    const valueChangesFn = untracked(this.config).expressions?.valueChanges;
 
-      if (valueChangesFn) {
-        valueChangesFn({ form: getRootControl(this.control()), currentControlValue: this.currentControlValue() });
-      }
-    });
-  }
+    if (valueChangesFn) {
+      valueChangesFn({ form: getRootControl(untracked(this.control)), currentControlValue: this.currentControlValue() });
+    }
+  });
 }

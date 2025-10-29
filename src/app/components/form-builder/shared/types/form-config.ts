@@ -1,14 +1,30 @@
-import { UntypedFormGroup, ValidatorFn } from '@angular/forms';
+import { FormControlStatus, UntypedFormGroup, ValidatorFn } from '@angular/forms';
+import { Observable } from 'rxjs';
 
 export type FormFieldConfig<T = unknown> = {
   label: string;
   cssClasses?: string[];
   cssStyles?: Record<string, string>;
   validators?: ValidatorFn[];
+  validationErrors?: Record<string, string>;
   options?: SelectOption<T>[];
+  maskConfig?: {
+    mask: string;
+    dropSpecialCharacters?: false;
+    shouldValidateMask?: true;
+    prefix?: string;
+    suffix?: string;
+  };
+  inputMode?: 'text' | 'numeric' | 'tel' | 'email';
   dependencies?: Dependency[];
+  displayWith?: (value: any) => string;
+  keepOpenPanelFn?: (value: any) => boolean;
+  debounce?: number;
   expressions?: {
     valueChanges?: (params: { form: UntypedFormGroup; currentControlValue: any }) => void;
+    autocompleteInputChangeFn?: (params: { inputValue: string | null }) => Observable<SelectOption<unknown>[]> | SelectOption<unknown>[];
+    onSelect?: (value: { fieldName: string; fieldValue: unknown; status: FormControlStatus }) => void;
+    onBlur?: (value: { fieldName: string; fieldValue: unknown; status: FormControlStatus }) => void;
   };
 };
 
@@ -24,7 +40,7 @@ export enum DependencyType {
   AddValidators,
 }
 
-type Dependency =
+export type Dependency =
   | {
       type: DependencyType.Hide | DependencyType.Disabled | DependencyType.Readonly;
       sourceField: string;

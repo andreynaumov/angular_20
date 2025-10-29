@@ -2,25 +2,23 @@ import { FormGroup, UntypedFormArray, UntypedFormControl, UntypedFormGroup } fro
 import { FormModel } from '../types/form-model';
 import { FormSchema } from '../types/form-schema';
 
-export function buildForm({
-  schema,
-  model,
-}: {
+export function buildForm(params: {
+  form: FormGroup<Record<string, UntypedFormControl | UntypedFormGroup | UntypedFormArray>>;
   schema: FormSchema;
   model: FormModel | null | undefined;
-}): FormGroup<Record<string, UntypedFormControl | UntypedFormGroup | UntypedFormArray>> {
-  const form = new FormGroup<Record<string, UntypedFormControl | UntypedFormGroup | UntypedFormArray>>({});
-
-  for (const fieldSchema of schema) {
-    const validators = fieldSchema.config?.validators;
-    const subModel = model?.[fieldSchema.name];
+}): void {
+  for (const fieldSchema of params.schema) {
+    const validators = fieldSchema.config.validators;
+    const subModel = params.model?.[fieldSchema.name];
 
     let control: UntypedFormControl | UntypedFormArray | UntypedFormGroup = new UntypedFormControl(subModel ?? null);
 
     if (fieldSchema.type === 'object') {
       const objectSubModel = typeof subModel === 'object' && !Array.isArray(subModel) ? subModel : null;
 
-      control = buildForm({ schema: fieldSchema.schema, model: objectSubModel });
+      control = new UntypedFormGroup({});
+
+      buildForm({ schema: fieldSchema.schema, model: objectSubModel, form: control });
     }
 
     if (fieldSchema.type === 'array') {
@@ -29,7 +27,9 @@ export function buildForm({
       const arraySubModel = typeof subModel === 'object' && Array.isArray(subModel) ? subModel : [];
 
       for (const arraySubModelItem of arraySubModel) {
-        control.push(buildForm({ schema: fieldSchema.schema, model: arraySubModelItem }));
+        const itemControl = new UntypedFormGroup({});
+
+        buildForm({ schema: fieldSchema.schema, model: arraySubModelItem, form: itemControl });
       }
     }
 
@@ -37,8 +37,6 @@ export function buildForm({
       control.addValidators(validators);
     }
 
-    form.addControl(fieldSchema.name, control);
+    params.form.addControl(fieldSchema.name, control, { emitEvent: false });
   }
-
-  return form;
 }

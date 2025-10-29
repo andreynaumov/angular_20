@@ -20,12 +20,13 @@ export class FormFieldArray extends CompositeFormField<UntypedFormArray> {
   public addItem() {
     const parentControlArray = this.control();
     const fieldSchema = this.fieldSchema();
+    const newControl = new UntypedFormGroup({});
 
     if (!fieldSchema) return;
 
-    const createdControl = buildForm({ schema: fieldSchema, model: null });
+    buildForm({ form: newControl, schema: fieldSchema, model: null });
 
-    parentControlArray.push(createdControl);
+    parentControlArray.push(newControl);
   }
 
   public removeItem(controlIndex: number) {

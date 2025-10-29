@@ -1,5 +1,5 @@
 <div>
-  <div class="label">{{ config()?.label }}</div>
+  <div class="label">{{ config().label }}</div>
 
   <div class="array">
     @for (control of controls(); track $index; let index = $index) {
@@ -8,10 +8,12 @@
           @let currentControl = control.controls[fieldSchema.name];
 
           <app-form-field
-            [customFields]="customFields()"
             [control]="currentControl"
+            [customFields]="customFields()"
             [fieldName]="fieldSchema.name"
             [fieldSchema]="fieldSchema"
+            [formErrors]="formErrors()"
+            [formModel]="formModel()"
           />
         }
 

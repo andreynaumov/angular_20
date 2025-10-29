@@ -11,7 +11,7 @@ export const formSchema = ({ options }: { options: Record<string, SelectOption<u
     schema: [
       {
         name: 'amount',
-        type: 'number',
+        type: 'string',
         config: {
           label: 'Сумма кредита',
         },

@@ -1,14 +1,14 @@
-import { Component, computed, DestroyRef, effect, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, input, signal, untracked } from '@angular/core';
 import { NgComponentOutlet, NgTemplateOutlet } from '@angular/common';
 import { ReactiveFormsModule, UntypedFormArray, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { FORM_FIELD_COMPONENTS } from '../shared/constants/form-field-components';
 import { FormFieldSchema } from '../shared/types/form-schema';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { startWith } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { CustomField } from '../shared/custom-field';
-import { DependencyType } from '../shared/types/form-config';
+import { Dependency, DependencyType } from '../shared/types/form-config';
 import { getRootControl } from '../shared/functions/get-root-control';
 import { findControlByName } from '../shared/functions/find-control-by-name';
+import { FormModel } from '../shared/types/form-model';
 
 @Component({
   selector: 'app-form-field',
@@ -16,24 +16,22 @@ import { findControlByName } from '../shared/functions/find-control-by-name';
   templateUrl: './form-field.html',
   styleUrl: './form-field.scss',
   host: {
-    '[class]': 'cssClasses()',
-    '[style]': 'cssStyles()',
+    '[class]': 'hostClasses()',
+    '[style]': 'hostStyles()',
   },
 })
 export class FormField {
-  private readonly destroyRef = inject(DestroyRef);
-
   public readonly fieldName = input.required<string>();
   public readonly fieldSchema = input.required<FormFieldSchema>();
   public readonly control = input.required<UntypedFormControl | UntypedFormGroup | UntypedFormArray>();
   public readonly customFields = input.required<readonly CustomField[]>();
+  public readonly formModel = input.required<FormModel | null | undefined>();
+  public readonly formErrors = input.required<Record<string, string[]> | null | undefined>();
 
   public readonly isShow = signal(true);
   public readonly isReadonly = signal(false);
 
   public readonly componentRef = computed(() => FORM_FIELD_COMPONENTS[this.fieldSchema().type]);
-  public readonly customField = computed(() => this.customFields()?.find((customField) => customField.name() === this.fieldName()));
-
   public readonly componentInputs = computed(() => {
     const fieldSchema = this.fieldSchema();
 
@@ -41,6 +39,8 @@ export class FormField {
       control: this.control(),
       fieldName: this.fieldName(),
       config: fieldSchema.config,
+      formModel: this.formModel(),
+      formErrors: this.formErrors(),
     };
 
     return fieldSchema.type === 'array' || fieldSchema.type === 'object'
@@ -48,66 +48,118 @@ export class FormField {
       : { ...commonInputs, isReadonly: this.isReadonly() };
   });
 
-  public readonly cssClasses = computed(
+  public readonly currentCustomField = computed(
+    () => this.customFields()?.find((customField) => customField.name() === this.fieldName())?.templateRef ?? null,
+  );
+
+  public readonly hostClasses = computed(
     () =>
       `${this.fieldSchema().config?.cssClasses?.join(' ') ?? ''} ${this.isShow() ? 'd-block' : 'd-none'} ${this.isReadonly() ? 'readonly' : ''}`,
   );
 
-  public readonly cssStyles = computed(() => this.fieldSchema().config?.cssStyles ?? {});
+  public readonly hostStyles = computed(() => this.fieldSchema().config?.cssStyles ?? {});
 
-  constructor() {
-    effect(() => {
-      const rootControl = getRootControl(this.control());
-      const dependencies = this.fieldSchema().config?.dependencies;
+  readonly #valueChangesSubscriptions = new Map<string, Subscription>();
 
-      if (!dependencies) return;
+  readonly dependenciesEffect = effect(() => {
+    const control = untracked(this.control);
+    const fieldSchema = untracked(this.fieldSchema);
+    const dependencies = fieldSchema.config.dependencies;
 
-      for (const dependency of dependencies) {
-        const sourceControl = findControlByName(dependency.sourceField, rootControl);
+    if (!dependencies) return;
 
-        if (!sourceControl) {
-          throw new Error(`Control with ${dependency.sourceField} is not exists`);
+    const rootControl = getRootControl(control);
+
+    for (const dependency of dependencies) {
+      const sourceControl = findControlByName(dependency.sourceField, rootControl);
+
+      if (!sourceControl) {
+        throw new Error(`Control with ${dependency.sourceField} is not exists`);
+      }
+
+      let prevSub = this.#valueChangesSubscriptions.get(dependency.sourceField) ?? null;
+
+      if (prevSub) {
+        prevSub.unsubscribe();
+      }
+
+      this.#updateDependencies({
+        isFirstUpdate: true,
+        payload: { dependency, rootControl, sourceControlValue: sourceControl.value, control, fieldSchema },
+      });
+
+      prevSub = sourceControl.valueChanges.subscribe((sourceControlValue) => {
+        this.#updateDependencies({
+          isFirstUpdate: false,
+          payload: { dependency, rootControl, sourceControlValue, control, fieldSchema },
+        });
+      });
+
+      this.#valueChangesSubscriptions.set(dependency.sourceField, prevSub);
+    }
+  });
+
+  #updateDependencies({
+    isFirstUpdate,
+    payload,
+  }: {
+    isFirstUpdate: boolean;
+    payload: {
+      dependency: Dependency;
+      rootControl: UntypedFormGroup;
+      sourceControlValue: unknown;
+      control: UntypedFormControl | UntypedFormGroup | UntypedFormArray;
+      fieldSchema: FormFieldSchema;
+    };
+  }): void {
+    const { dependency, rootControl, sourceControlValue, control, fieldSchema } = payload;
+
+    const result = dependency.when({ form: rootControl, sourceControlValue });
+
+    switch (dependency.type) {
+      case DependencyType.Hide: {
+        const isShow = !result;
+
+        const controlValidators = fieldSchema.config.validators ?? [];
+
+        if (isShow) {
+          control.addValidators(controlValidators);
+        } else {
+          control.removeValidators(controlValidators);
         }
 
-        sourceControl.valueChanges
-          .pipe(startWith(sourceControl.value), takeUntilDestroyed(this.destroyRef))
-          .subscribe((sourceControlValue) => {
-            const result = dependency.when({ form: rootControl, sourceControlValue });
+        if (!isFirstUpdate) {
+          control.setValue(null);
+        }
 
-            switch (dependency.type) {
-              case DependencyType.Hide: {
-                const isShow = !result;
+        this.isShow.set(isShow);
 
-                this.isShow.set(isShow);
-
-                const controlValidators = this.fieldSchema().config?.validators ?? [];
-
-                if (isShow) {
-                  this.control().addValidators(controlValidators);
-                } else {
-                  this.control().removeValidators(controlValidators);
-                  this.control().reset();
-                }
-
-                this.control().updateValueAndValidity();
-                break;
-              }
-
-              case DependencyType.Disabled:
-                result ? this.control().disable() : this.control().enable();
-                break;
-
-              case DependencyType.Readonly:
-                this.isReadonly.set(result);
-                break;
-
-              case DependencyType.AddValidators:
-                result ? this.control().addValidators(dependency.validators) : this.control().removeValidators(dependency.validators);
-                this.control().updateValueAndValidity();
-                break;
-            }
-          });
+        break;
       }
-    });
+
+      case DependencyType.Disabled:
+        if (result) {
+          control.disable({ emitEvent: false });
+        } else {
+          control.enable({ emitEvent: false });
+        }
+
+        break;
+
+      case DependencyType.Readonly:
+        this.isReadonly.set(result);
+        break;
+
+      case DependencyType.AddValidators:
+        if (result) {
+          control.addValidators(dependency.validators);
+        } else {
+          control.removeValidators(dependency.validators);
+        }
+
+        control.updateValueAndValidity();
+
+        break;
+    }
   }
 }

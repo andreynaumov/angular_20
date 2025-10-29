@@ -1,5 +1,5 @@
-import { Component, computed, contentChildren, input, output } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
+import { Component, contentChildren, input, OnInit, output } from '@angular/core';
+import { FormGroup, ReactiveFormsModule, UntypedFormArray, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { FormField } from '../form-field/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { CustomField } from '../shared/custom-field';
@@ -13,15 +13,20 @@ import { buildForm } from '../shared/functions/build-form.function';
   templateUrl: './form.html',
   styleUrl: './form.scss',
 })
-export class Form {
+export class Form implements OnInit {
+  public readonly form = input.required<FormGroup<Record<string, UntypedFormControl | UntypedFormGroup | UntypedFormArray>>>();
   public readonly formSchema = input.required<FormSchema>();
+
   public readonly formModel = input<FormModel | null | undefined>(null);
+  public readonly formErrors = input<Record<string, string[]> | null | undefined>(null);
 
   public readonly submitEvent = output<Record<string, unknown>>();
 
   public readonly customFields = contentChildren(CustomField);
 
-  public readonly form = computed(() => buildForm({ schema: this.formSchema(), model: this.formModel() }));
+  public ngOnInit(): void {
+    buildForm({ form: this.form(), schema: this.formSchema(), model: null });
+  }
 
   public getCustomField(fieldName: string): CustomField | undefined {
     return this.customFields().find((customField) => customField.name() === fieldName);

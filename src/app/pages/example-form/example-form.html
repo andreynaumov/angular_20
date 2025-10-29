@@ -1,7 +1,7 @@
 @let formSchemaValue = formSchema();
 
 @if (formSchemaValue) {
-  <app-form [formSchema]="formSchemaValue" [formModel]="formModel()" (submitEvent)="logFormValue($event)">
+  <app-form [form]="form" [formSchema]="formSchemaValue" [formModel]="formModel()" (submitEvent)="logFormValue($event)">
     <ng-template appCustomField="fullAddress" let-control="control" let-fieldSchema="fieldSchema" let-config="config">
       <div class="suggest-address">
         <!-- <pre>control.value: {{ control.value }}</pre> -->

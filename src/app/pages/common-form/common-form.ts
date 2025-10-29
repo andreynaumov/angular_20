@@ -3,7 +3,7 @@ import { formSchema } from './common-form.const';
 import { FormSchema } from '../../components/form-builder/shared/types/form-schema';
 import { FormModel } from '../../components/form-builder/shared/types/form-model';
 import { Form } from '../../components/form-builder/form/form';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { optionsMock } from './mocks/options.mock';
 import { formModel } from './mocks/model.mock';
@@ -17,6 +17,7 @@ import { formModel } from './mocks/model.mock';
 export class CommonForm {
   public readonly formSchema = signal<FormSchema | null>(null);
   public readonly formModel = signal<FormModel | null>(null);
+  public readonly form = new UntypedFormGroup({});
 
   public logFormValue(formValue: Record<string, unknown>) {
     console.log(formValue);

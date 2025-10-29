@@ -14,7 +14,6 @@ export const FORM_FIELD_COMPONENTS: Record<
   Type<BaseFormField<UntypedFormControl>> | Type<BaseFormField<UntypedFormArray>> | Type<BaseFormField<UntypedFormGroup>>
 > = {
   string: FormFieldInput,
-  number: FormFieldInput,
   date: FormFieldDate,
   select: FormFieldSelect,
   checkbox: FormFieldBoolean,
