@@ -2,12 +2,18 @@
   <mat-form-field>
     <mat-label>{{ config().label }}</mat-label>
 
-    <input [formControl]="control()" matInput [matDatepicker]="picker" />
+    <input [formControl]="control()" matInput [matDatepicker]="picker" (blur)="onBlurEvent()" />
 
-    <mat-hint>MM/DD/YYYY</mat-hint>
+    <mat-hint>ДД/ММ/ГГГГ</mat-hint>
 
     <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
 
     <mat-datepicker #picker></mat-datepicker>
+
+    @if (control().invalid && control().touched) {
+      @for (errorKey of control().errors | keyvalue; track errorKey.key) {
+        <mat-error>{{ validationErrors()[errorKey.key] || 'Неверная дата' }}</mat-error>
+      }
+    }
   </mat-form-field>
 </div>

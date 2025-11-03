@@ -30,6 +30,8 @@ export function buildForm(params: {
         const itemControl = new UntypedFormGroup({});
 
         buildForm({ schema: fieldSchema.schema, model: arraySubModelItem, form: itemControl });
+
+        control.push(itemControl);
       }
     }
 

@@ -61,15 +61,14 @@ export abstract class PrimitiveFormField extends BaseFormField<UntypedFormContro
     if (model === null || model === undefined) return;
 
     /**
-     * Устанавливаем значение только если оно есть в formModel
-     *
-     * Добавляем { emitEvent: false }, так как нам НЕ нужно тригерить valueChanges у контролов.
+     * Устанавливаем значение только если оно есть в formModel.
+     * Используем { emitEvent: false }, чтобы не триггерить valueChanges у контролов.
      * Нам нужно только задать начальное значение для контрола.
      */
     control.setValue(model, { emitEvent: false });
 
     /**
-     * Очищаем effect, так как нам нужно установить значение только один раз
+     * Очищаем effect, так как нам нужно установить значение только один раз.
      */
     this.#setControlValueEffect.destroy();
 

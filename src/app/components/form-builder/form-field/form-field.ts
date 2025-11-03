@@ -1,4 +1,4 @@
-import { Component, computed, effect, input, signal, untracked } from '@angular/core';
+import { Component, computed, effect, input, OnDestroy, signal, untracked } from '@angular/core';
 import { NgComponentOutlet, NgTemplateOutlet } from '@angular/common';
 import { ReactiveFormsModule, UntypedFormArray, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { FORM_FIELD_COMPONENTS } from '../shared/constants/form-field-components';
@@ -20,7 +20,7 @@ import { FormModel } from '../shared/types/form-model';
     '[style]': 'hostStyles()',
   },
 })
-export class FormField {
+export class FormField implements OnDestroy {
   public readonly fieldName = input.required<string>();
   public readonly fieldSchema = input.required<FormFieldSchema>();
   public readonly control = input.required<UntypedFormControl | UntypedFormGroup | UntypedFormArray>();
@@ -161,5 +161,13 @@ export class FormField {
 
         break;
     }
+  }
+
+  /**
+   * Очистка подписок для предотвращения утечек памяти.
+   */
+  public ngOnDestroy(): void {
+    this.#valueChangesSubscriptions.forEach((subscription) => subscription.unsubscribe());
+    this.#valueChangesSubscriptions.clear();
   }
 }

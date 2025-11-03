@@ -10,7 +10,7 @@ export function findControlByName(controlName: string, rootControl: AbstractCont
     }
 
     /**
-     *  Ищем во вдоженных группах и массивах
+     * Ищем во вложенных группах и массивах
      */
     for (const currentControl of Object.values(rootControl.controls)) {
       if (currentControl instanceof FormGroup || currentControl instanceof FormArray) {
