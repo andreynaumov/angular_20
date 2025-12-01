@@ -1,13 +1,8 @@
-<div>
-  <mat-form-field class="example-form-field">
-    <mat-label>{{ config().label }}</mat-label>
-
-    <input [readonly]="isReadonly()" matInput type="text" [formControl]="control()" (blur)="onBlurEvent()" />
-
-    @if (control().invalid && control().touched) {
-      @for (errorKey of control().errors | keyvalue; track errorKey.key) {
-        <mat-error>{{ validationErrors()[errorKey.key] || 'Неверное значение' }}</mat-error>
-      }
-    }
-  </mat-form-field>
-</div>
+<ui-old-input
+  [label]="config().label"
+  [placeholder]="`Input ${config().label.toLowerCase()} ...`"
+  [readonly]="isReadonly()"
+  (blurEvent)="onBlurEvent()"
+  [errorMessages]="$any(validationErrors())"
+  [formControl]="control()"
+/>

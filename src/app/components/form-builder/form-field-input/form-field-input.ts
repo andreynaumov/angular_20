@@ -1,12 +1,11 @@
 import { Component } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { MatInputModule } from '@angular/material/input';
 import { PrimitiveFormField } from '../shared/abstractions/primitive-form-field';
-import { KeyValuePipe } from '@angular/common';
+import { InputOld } from '../../../ui-old/input/input';
 
 @Component({
   selector: 'app-form-field-input',
-  imports: [ReactiveFormsModule, MatInputModule, KeyValuePipe],
+  imports: [ReactiveFormsModule, InputOld],
   templateUrl: './form-field-input.html',
   styleUrl: './form-field-input.scss',
 })

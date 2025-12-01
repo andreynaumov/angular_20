@@ -33,6 +33,9 @@ export const formSchema = ({ options }: { options: Record<string, SelectOption<u
         config: {
           label: 'First Name',
           validators: [Validators.required],
+          validationErrors: {
+            required: 'Field is required.',
+          },
           dependencies: [
             {
               type: DependencyType.Disabled,

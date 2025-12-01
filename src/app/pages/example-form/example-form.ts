@@ -6,10 +6,11 @@ import { Form } from '../../components/form-builder/form/form';
 import { CustomField } from '../../components/form-builder/shared/custom-field';
 import { FormSchema } from '../../components/form-builder/shared/types/form-schema';
 import { FormModel } from '../../components/form-builder/shared/types/form-model';
+import { InputOld } from '../../ui-old/input/input';
 
 @Component({
   selector: 'app-example-form',
-  imports: [Form, CustomField, ReactiveFormsModule],
+  imports: [Form, CustomField, ReactiveFormsModule, InputOld],
   templateUrl: './example-form.html',
   styleUrl: './example-form.scss',
 })

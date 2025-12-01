@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { PrimitiveFormField } from '../shared/abstractions/primitive-form-field';
+import { CheckboxOld } from '../../../ui-old/checkbox/checkbox';
 
 @Component({
   selector: 'app-form-field-boolean',
-  imports: [ReactiveFormsModule, MatCheckboxModule],
+  imports: [ReactiveFormsModule, CheckboxOld],
   templateUrl: './form-field-boolean.html',
   styleUrl: './form-field-boolean.scss',
 })
