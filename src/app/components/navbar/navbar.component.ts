@@ -14,5 +14,6 @@ export class NavbarComponent {
     { link: 'ui-input', label: 'UI Input' },
     { link: 'ui-checkbox', label: 'UI Checkbox' },
     { link: 'ui-datepicker', label: 'UI Datepicker' },
+    { link: 'ui-select', label: 'UI Select' },
   ];
 }

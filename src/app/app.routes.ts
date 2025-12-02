@@ -26,4 +26,8 @@ export const routes: Routes = [
     path: 'ui-datepicker',
     loadComponent: () => import('./pages/ui-datepicker/ui-datepicker').then((f) => f.UiDatepicker),
   },
+  {
+    path: 'ui-select',
+    loadComponent: () => import('./pages/ui-select/ui-select').then((f) => f.UiSelect),
+  },
 ];
