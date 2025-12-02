@@ -1,16 +1,11 @@
 import { Component } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { provideNativeDateAdapter } from '@angular/material/core';
 import { PrimitiveFormField } from '../shared/abstractions/primitive-form-field';
-import { KeyValuePipe } from '@angular/common';
+import { DatepickerOld } from '@ui-old/datepicker/datepicker';
 
 @Component({
   selector: 'app-form-field-date',
-  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatDatepickerModule, KeyValuePipe],
-  providers: [provideNativeDateAdapter()],
+  imports: [ReactiveFormsModule, DatepickerOld],
   templateUrl: './form-field-date.html',
   styleUrl: './form-field-date.scss',
 })
