@@ -2,12 +2,12 @@ import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
-  selector: 'app-navbar',
-  templateUrl: './navbar.component.html',
-  styleUrl: './navbar.component.scss',
+  selector: 'app-main-layout',
   imports: [RouterLink, RouterLinkActive],
+  templateUrl: './main-layout.html',
+  styleUrl: './main-layout.scss',
 })
-export class NavbarComponent {
+export class MainLayout {
   menuItems = [
     { link: 'example-form', label: 'Example Form' },
     { link: 'common-form', label: 'Common Form' },
