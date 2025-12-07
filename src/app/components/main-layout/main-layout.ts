@@ -9,7 +9,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 })
 export class MainLayout {
   menuItems = [
-    { link: 'example-form', label: 'Example Form' },
+    { link: 'form-builder-sandbox', label: 'Form builder sandbox' },
     { link: 'form-sandbox', label: 'Form Sandbox' },
     { link: 'ui-input', label: 'UI Input' },
     { link: 'ui-checkbox', label: 'UI Checkbox' },

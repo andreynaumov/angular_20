@@ -1,20 +1,20 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
-import { formSchema } from './example-form.const';
 import { from } from 'rxjs';
 import { Form } from '@form-builder/form/form';
 import { CustomField } from '@form-builder/shared/custom-field';
 import { InputOld } from '@ui-old/input/input';
 import { FormSchema } from '@form-builder/shared/types/form-schema';
 import { FormModel } from '@form-builder/shared/types/form-model';
+import { formSchema } from './form-builder-sandbox-schema';
 
 @Component({
-  selector: 'app-example-form',
+  selector: 'app-form-builder-sandbox',
   imports: [Form, CustomField, ReactiveFormsModule, InputOld],
-  templateUrl: './example-form.html',
-  styleUrl: './example-form.scss',
+  templateUrl: './form-builder-sandbox.html',
+  styleUrl: './form-builder-sandbox.scss',
 })
-export class ExampleForm implements OnInit {
+export class FormBuilderSandbox {
   public readonly formSchema = signal<FormSchema | null>(null);
   public readonly formModel = signal<FormModel | null>(null);
   public readonly form = new UntypedFormGroup({});

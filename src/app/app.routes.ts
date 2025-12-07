@@ -7,8 +7,8 @@ export const routes: Routes = [
     redirectTo: 'common-form',
   },
   {
-    path: 'example-form',
-    loadComponent: () => import('./pages/example-form/example-form').then((f) => f.ExampleForm),
+    path: 'form-builder-sandbox',
+    loadComponent: () => import('./pages/form-builder-sandbox/form-builder-sandbox').then((f) => f.FormBuilderSandbox),
   },
   {
     path: 'form-sandbox',
