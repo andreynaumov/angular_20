@@ -1,12 +1,9 @@
-import { signal } from '@angular/core';
-import { FormControl, ValidatorFn } from '@angular/forms';
-import { auditTime, distinctUntilChanged, map, startWith, Subscription } from 'rxjs';
+import { computed, effect, signal } from '@angular/core';
+import { FormControl, UntypedFormControl, ValidatorFn } from '@angular/forms';
+import { auditTime, distinctUntilChanged, filter, map, Observable, startWith, Subscription } from 'rxjs';
 import { BaseSchema } from './base-schema';
 import { SelectOption } from '@ui-old/select/select';
-
-export function createControlSchema<T>(name: string, control: FormControl<T>) {
-  return new ControlSchema(name, control);
-}
+import { Dependency } from './dependency';
 
 export class ControlSchema<T> extends BaseSchema {
   readonly #isHide = signal(false);
@@ -15,7 +12,7 @@ export class ControlSchema<T> extends BaseSchema {
   readonly #fieldType = signal<'input' | 'checkbox' | 'date' | 'select'>('input');
   readonly #options = signal<SelectOption<T>[]>([]);
 
-  readonly #subscriptions = new Set<Subscription>();
+  readonly #dependencies: Dependency<any>[] = [];
   #isDestroyed = false;
 
   #blur: (value: T) => void = () => undefined;
@@ -50,23 +47,17 @@ export class ControlSchema<T> extends BaseSchema {
     return this;
   }
 
-  addFieldType(fieldType: 'input' | 'checkbox' | 'date' | 'select'): this {
+  addMeta(params: { fieldType: 'input' | 'checkbox' | 'date' | 'select'; label: string; placeholder: string }): this {
+    const { fieldType, label, placeholder } = params;
     this.#fieldType.set(fieldType);
-    return this;
-  }
-
-  addLabel(label: string): this {
     this.#label.set(label);
+    this.#placeholder.set(placeholder);
+
     return this;
   }
 
   addOptions(options: SelectOption<T>[]): this {
     this.#options.set(options);
-    return this;
-  }
-
-  addPlaceholder(placeholder: string): this {
-    this.#placeholder.set(placeholder);
     return this;
   }
 
@@ -81,12 +72,14 @@ export class ControlSchema<T> extends BaseSchema {
    * @param logicFn - функция, возвращающая true если поле должно быть скрыто
    */
   addHideDependency<R>(sourceControlSchema: ControlSchema<R>, logicFn: (value: R) => boolean): this {
-    this.#subscribeToDependency(sourceControlSchema, logicFn, (result) => {
-      if (result) {
+    this.#addDependency(sourceControlSchema, (result) => {
+      const isHide = logicFn(result);
+
+      if (isHide) {
         this.control.reset();
       }
 
-      this.#isHide.set(result);
+      this.#isHide.set(isHide);
     });
 
     return this;
@@ -98,8 +91,8 @@ export class ControlSchema<T> extends BaseSchema {
    * @param logicFn - функция, возвращающая true если поле должно быть заблокировано
    */
   addDisableDependency<R>(sourceControlSchema: ControlSchema<R>, logicFn: (value: R) => boolean): this {
-    this.#subscribeToDependency(sourceControlSchema, logicFn, (result) => {
-      if (result) {
+    this.#addDependency(sourceControlSchema, (result) => {
+      if (logicFn(result)) {
         this.control.disable();
       } else {
         this.control.enable();
@@ -116,8 +109,8 @@ export class ControlSchema<T> extends BaseSchema {
    * @param logicFn - функция, возвращающая true если валидаторы должны быть активны
    */
   addValidatorsDependency<R>(sourceControlSchema: ControlSchema<R>, validators: ValidatorFn[], logicFn: (value: R) => boolean): this {
-    this.#subscribeToDependency(sourceControlSchema, logicFn, (result) => {
-      if (result) {
+    this.#addDependency(sourceControlSchema, (result) => {
+      if (logicFn(result)) {
         this.control.addValidators(validators);
       } else {
         this.control.removeValidators(validators);
@@ -128,38 +121,42 @@ export class ControlSchema<T> extends BaseSchema {
     return this;
   }
 
-  /**
-   * Общий метод для создания подписки на изменения зависимого контрола
-   * @private
-   */
-  #subscribeToDependency<R>(
-    sourceControlSchema: ControlSchema<R>,
-    logicFn: (value: R) => boolean,
-    callback: (result: boolean) => void,
-  ): void {
-    if (this.#isDestroyed) {
-      console.warn(`Cannot add dependency to destroyed ControlSchema: ${this.controlName}`);
-      return;
-    }
+  runDependencyTracing(): void {
+    this.#dependencies.forEach((dependency) => {
+      dependency.subscribe();
+    });
+  }
 
-    const subscription = sourceControlSchema.control.valueChanges
-      .pipe(startWith(sourceControlSchema.control.value), map(logicFn), distinctUntilChanged(), auditTime(0))
-      .subscribe(callback);
-
-    this.#subscriptions.add(subscription);
+  runDependencies(): void {
+    this.#dependencies.forEach((dependency) => {
+      dependency.runOnce();
+    });
   }
 
   /**
    * Очищает все подписки и помечает схему как уничтоженную
    * Должен вызываться при уничтожении компонента/сервиса для предотвращения утечек памяти
    */
-  destroy(): void {
+  destroyDependencyTracking(): void {
     if (this.#isDestroyed) {
       return;
     }
 
-    this.#subscriptions.forEach((sub) => sub.unsubscribe());
-    this.#subscriptions.clear();
-    this.#isDestroyed = true;
+    this.#dependencies.forEach((dependency) => {
+      dependency.unsubscribe();
+    });
+  }
+
+  /**
+   * Общий метод для создания подписки на изменения зависимого контрола
+   * @private
+   */
+  #addDependency<R>(sourceControlSchema: ControlSchema<R>, callback: (result: R) => void): void {
+    if (this.#isDestroyed) {
+      console.warn(`Cannot add dependency to destroyed ControlSchema: ${this.controlName}`);
+      return;
+    }
+
+    this.#dependencies.push(new Dependency(sourceControlSchema, callback));
   }
 }

@@ -4,15 +4,15 @@ import { GroupSchema } from './group-schema';
 // Базовый абстрактный класс для всех схем
 export abstract class BaseSchema {
   constructor(
-    protected readonly controlName: string,
-    private readonly schemaType: 'group' | 'control'
+    public readonly controlName: string,
+    private readonly schemaType: 'group' | 'control',
   ) {}
 
   /**
    * Уничтожает схему и очищает все подписки
    * Должен вызываться при уничтожении компонента/сервиса для предотвращения утечек памяти
    */
-  abstract destroy(): void;
+  abstract destroyDependencyTracking(): void;
 
   // Type guards для проверки типа в шаблонах
   // Используем более общий тип, чтобы избежать циклических зависимостей

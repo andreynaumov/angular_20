@@ -17,6 +17,7 @@ export class FormSandbox implements OnInit {
 
   public readonly formSchema = this.#formSandboxService.formSchema;
   public readonly form = this.#formSandboxService.form;
+  public readonly user = this.#formSandboxService.user;
 
   ngOnInit(): void {
     this.#formSandboxService.updateSexOptions([

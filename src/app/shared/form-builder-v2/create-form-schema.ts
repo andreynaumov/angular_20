@@ -1,21 +1,21 @@
-import { signal, WritableSignal } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup } from '@angular/forms';
-import { ControlSchema, createControlSchema } from './control-schema';
+import { ControlSchema } from './control-schema';
 import { GroupSchema } from './group-schema';
 
 export function createFormSchema<T extends FormGroup>(
   name: string,
   form: T,
-  schemaFn: (form: GroupSchemaWithProperties<T>) => void
-): WritableSignal<GroupSchemaWithProperties<T>> {
+  schemaFn: (form: GroupSchemaWithProperties<T>) => void,
+): GroupSchemaWithProperties<T> {
   const baseSchema = new GroupSchema(name, form);
 
   // Оборачиваем в Proxy с правильной типизацией
   const formSchema = wrapGroupSchema(baseSchema, form);
 
   schemaFn(formSchema);
+  formSchema.runDependencyTracing();
 
-  return signal(formSchema);
+  return formSchema;
 }
 
 type FormToSchema<T> =
