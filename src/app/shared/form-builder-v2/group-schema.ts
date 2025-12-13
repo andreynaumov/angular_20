@@ -47,12 +47,6 @@ export class GroupSchema<T extends Record<string, AbstractControl>> extends Base
     this.schemaObject[name] = schema;
   }
 
-  runDependencyTracing(): void {
-    this.#schemaList.forEach((schema) => {
-      schema.runDependencyTracing();
-    });
-  }
-
   runDependencies(): void {
     this.#schemaList.forEach((schema) => {
       schema.runDependencies();

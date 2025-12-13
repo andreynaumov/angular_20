@@ -13,7 +13,7 @@ export function createFormSchema<T extends FormGroup>(
   const formSchema = wrapGroupSchema(baseSchema, form);
 
   schemaFn(formSchema);
-  formSchema.runDependencyTracing();
+  // formSchema.runDependencyTracing();
 
   return formSchema;
 }

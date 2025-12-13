@@ -1,6 +1,5 @@
-import { computed, effect, signal } from '@angular/core';
-import { FormControl, UntypedFormControl, ValidatorFn } from '@angular/forms';
-import { auditTime, distinctUntilChanged, filter, map, Observable, startWith, Subscription } from 'rxjs';
+import { signal } from '@angular/core';
+import { FormControl, ValidatorFn } from '@angular/forms';
 import { BaseSchema } from './base-schema';
 import { SelectOption } from '@ui-old/select/select';
 import { Dependency } from './dependency';
@@ -13,7 +12,6 @@ export class ControlSchema<T> extends BaseSchema {
   readonly #options = signal<SelectOption<T>[]>([]);
 
   readonly #dependencies: Dependency<any>[] = [];
-  #isDestroyed = false;
 
   #blur: (value: T) => void = () => undefined;
 
@@ -121,12 +119,6 @@ export class ControlSchema<T> extends BaseSchema {
     return this;
   }
 
-  runDependencyTracing(): void {
-    this.#dependencies.forEach((dependency) => {
-      dependency.subscribe();
-    });
-  }
-
   runDependencies(): void {
     this.#dependencies.forEach((dependency) => {
       dependency.runOnce();
@@ -138,10 +130,6 @@ export class ControlSchema<T> extends BaseSchema {
    * Должен вызываться при уничтожении компонента/сервиса для предотвращения утечек памяти
    */
   destroyDependencyTracking(): void {
-    if (this.#isDestroyed) {
-      return;
-    }
-
     this.#dependencies.forEach((dependency) => {
       dependency.unsubscribe();
     });
@@ -152,11 +140,6 @@ export class ControlSchema<T> extends BaseSchema {
    * @private
    */
   #addDependency<R>(sourceControlSchema: ControlSchema<R>, callback: (result: R) => void): void {
-    if (this.#isDestroyed) {
-      console.warn(`Cannot add dependency to destroyed ControlSchema: ${this.controlName}`);
-      return;
-    }
-
     this.#dependencies.push(new Dependency(sourceControlSchema, callback));
   }
 }

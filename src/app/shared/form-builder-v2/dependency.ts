@@ -1,6 +1,6 @@
 import { distinctUntilChanged, startWith, Subscription } from 'rxjs';
 import { ControlSchema } from './control-schema';
-import { effect } from '@angular/core';
+import { effect, untracked } from '@angular/core';
 
 export class Dependency<R> {
   #subscription: Subscription | null = null;
@@ -22,9 +22,9 @@ export class Dependency<R> {
     const { control } = this.sourceControlSchema.value();
 
     this.#subscription?.unsubscribe();
-    this.#subscription = control.valueChanges
-      .pipe(startWith(control.value), distinctUntilChanged())
-      .subscribe((value) => this.dependencyEffectFn(value));
+    this.#subscription = control.valueChanges.pipe(startWith(control.value), distinctUntilChanged()).subscribe((value) => {
+      untracked(() => this.dependencyEffectFn(value));
+    });
   }
 
   unsubscribe(): void {
