@@ -30,4 +30,8 @@ export const routes: Routes = [
     path: 'ui-select',
     loadComponent: () => import('./pages/ui-select/ui-select').then((f) => f.UiSelect),
   },
+  {
+    path: 'empty',
+    loadComponent: () => import('./pages/empty-page/empty-page').then((f) => f.EmptyPage),
+  },
 ];

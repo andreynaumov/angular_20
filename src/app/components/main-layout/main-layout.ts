@@ -15,5 +15,6 @@ export class MainLayout {
     { link: 'ui-checkbox', label: 'UI Checkbox' },
     { link: 'ui-datepicker', label: 'UI Datepicker' },
     { link: 'ui-select', label: 'UI Select' },
+    { link: 'empty', label: 'Empty' },
   ];
 }
