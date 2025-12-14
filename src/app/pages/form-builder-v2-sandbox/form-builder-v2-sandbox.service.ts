@@ -2,15 +2,11 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ControlSchema } from '@form-builder-v2/control-schema';
 import { createFormSchema } from '@form-builder-v2/create-form-schema';
-import { SelectOption } from '@ui-old/select/select';
 
 type User = {
   registrationAddress: string | null;
-  realEstate: {
-    isMatch: boolean | null;
-    address: string | null;
-  };
-  sex: string | null;
+  addressMatches: boolean | null;
+  address: string | null;
   birthdate?: string | null;
   age?: string | null;
 };
@@ -25,11 +21,8 @@ type ToForm<T extends Record<string, unknown>> = {
 export class FormBuilderV2SandboxService implements OnDestroy {
   #form = new FormGroup<UserForm>({
     registrationAddress: new FormControl<string | null>(null),
-    realEstate: new FormGroup({
-      isMatch: new FormControl<boolean | null>(null),
-      address: new FormControl<string | null>(null),
-    }),
-    sex: new FormControl<string | null>(null),
+    addressMatches: new FormControl<boolean | null>(null),
+    address: new FormControl<string | null>(null),
   });
 
   get form() {
@@ -37,36 +30,29 @@ export class FormBuilderV2SandboxService implements OnDestroy {
   }
 
   formSchema = createFormSchema('root', this.#form, (formSchema) => {
+    const isValidAddress = (registrationAddress: string | null) => {
+      return registrationAddress === 'valid address';
+    };
+
     formSchema.registrationAddress
       .addMeta({ fieldType: 'input', label: 'Registration address', placeholder: 'Input registration address...' })
       .onBlur((value) => {
-        // console.log('on blur: ', value);
+        console.log('on blur: ', value);
       });
 
-    formSchema.realEstate.isMatch
+    formSchema.addressMatches
       .addMeta({ fieldType: 'checkbox', label: 'Is match addresses', placeholder: '' })
-      .addHideDependency(formSchema.registrationAddress, (value) => Boolean(value && value.length > 5));
+      .addHideDependency(formSchema.registrationAddress, (value) => !isValidAddress(value));
 
-    formSchema.realEstate.address
+    formSchema.address
       .addMeta({ fieldType: 'input', label: 'Real estate address', placeholder: 'Input real estate address...' })
-      .addHideDependency(formSchema.realEstate.isMatch, (value) => typeof value === 'boolean' && value);
-
-    formSchema.sex
-      .addMeta({ fieldType: 'select', label: 'Sex', placeholder: 'Input sex...' })
-      .addHideDependency(formSchema.registrationAddress, (value) => Boolean(value && value.length > 5))
-      .addDisableDependency(formSchema.realEstate.isMatch, (value) => typeof value === 'boolean' && value);
+      .addHideDependency(formSchema.addressMatches, (value) => value === true);
   });
 
-  updateSexOptions(options: SelectOption<'male' | 'female'>[]) {
-    this.formSchema.sex.addOptions(options);
-  }
-
   user = {
-    registrationAddress: 'someaddress',
-    realEstate: { isMatch: true, address: 'someaddress' },
-    // birthdate: '2020-12-11',
-    // age: '24',
-    sex: 'male',
+    registrationAddress: 'invalid address',
+    addressMatches: true,
+    address: 'someaddress',
   };
 
   updateForm() {

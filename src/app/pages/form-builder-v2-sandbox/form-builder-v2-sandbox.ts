@@ -17,13 +17,6 @@ export class FormBuilderV2Sandbox {
   public readonly form = this.#formBuilderV2SandboxService.form;
   public readonly user = this.#formBuilderV2SandboxService.user;
 
-  ngOnInit(): void {
-    this.#formBuilderV2SandboxService.updateSexOptions([
-      { value: 'male', label: 'Male' },
-      { value: 'female', label: 'Female' },
-    ]);
-  }
-
   handle() {
     this.#formBuilderV2SandboxService.addField({
       name: 'birthdate',
